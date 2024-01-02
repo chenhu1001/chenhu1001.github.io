@@ -1,0 +1,12 @@
+# hexo robots.txt
+User-agent: * Allow: /
+Allow: /archives/
+Allow: /vendors/
+Allow: /js/
+Allow: /css/
+Allow: /fonts/
+Allow: /vendors/
+Allow: /fancybox/
+
+Sitemap: https://chenhu1001.github.io/sitemap.xml
+Sitemap: https://chenhu1001.github.io/baidusitemap.xml
