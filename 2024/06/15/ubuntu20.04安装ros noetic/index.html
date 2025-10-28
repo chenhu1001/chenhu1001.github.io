@@ -1,0 +1,259 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ubuntu20.04安装ros noetic | Clang's Blog</title><meta name="author" content="Clang"><meta name="copyright" content="Clang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="一、安装ROS neotic步骤第一步：换源（在软件和更新里面）这一步非常重要，决定着后面安装ROS能否成功的关键一步。这里，我选择了中科大（https:&#x2F;&#x2F;mirrors.ustc.edu.cn&#x2F;ubuntu&#x2F;）。 第二步：添加ROS软件源1sudo sh -c &amp;#x27;echo &quot;deb http:&#x2F;&#x2F;packages.ros.org&#x2F;ros&#x2F;ubuntu $(lsb_relea">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ubuntu20.04安装ros noetic">
+<meta property="og:url" content="https://www.clang.asia/2024/06/15/ubuntu20.04%E5%AE%89%E8%A3%85ros%20noetic/index.html">
+<meta property="og:site_name" content="Clang&#39;s Blog">
+<meta property="og:description" content="一、安装ROS neotic步骤第一步：换源（在软件和更新里面）这一步非常重要，决定着后面安装ROS能否成功的关键一步。这里，我选择了中科大（https:&#x2F;&#x2F;mirrors.ustc.edu.cn&#x2F;ubuntu&#x2F;）。 第二步：添加ROS软件源1sudo sh -c &amp;#x27;echo &quot;deb http:&#x2F;&#x2F;packages.ros.org&#x2F;ros&#x2F;ubuntu $(lsb_relea">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_8.png">
+<meta property="article:published_time" content="2024-06-15T09:56:17.000Z">
+<meta property="article:modified_time" content="2025-10-28T11:06:54.981Z">
+<meta property="article:author" content="Clang">
+<meta property="article:tag" content="ROS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_8.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ubuntu20.04安装ros noetic",
+  "url": "https://www.clang.asia/2024/06/15/ubuntu20.04%E5%AE%89%E8%A3%85ros%20noetic/",
+  "image": "https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_8.png",
+  "datePublished": "2024-06-15T09:56:17.000Z",
+  "dateModified": "2025-10-28T11:06:54.981Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Clang",
+      "url": "https://www.clang.asia/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://www.clang.asia/2024/06/15/ubuntu20.04%E5%AE%89%E8%A3%85ros%20noetic/index.html"><link rel="preconnect" href="//unpkg.com"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//static.cloudflareinsights.com"/><link rel="preconnect" href="//www.clarity.ms"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><script>(adsbygoogle = window.adsbygoogle || []).push({
+  google_ad_client: 'ca-pub-9329019376666398',
+  enable_page_level_ads: 'true'
+});</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?fd1f2eae75bb4a079b4b9730ab6f647d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-NJP2QJBR4D"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'G-NJP2QJBR4D')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'G-NJP2QJBR4D', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;fa1cb58cb1ec4e1f845351de70b52d1f&quot;}"></script><script>(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "gpbipe06m1");</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://unpkg.com/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ubuntu20.04安装ros noetic',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Clang's Blog" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/AI"><i class="fa-fw fas fa-microchip"></i><span> AI</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 后端</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/Java"><i class="fa-fw fas fa-compass"></i><span> Java</span></a></li><li><a class="site-page child" href="/categories/Go"><i class="fa-fw fas fa-cloud"></i><span> Go</span></a></li><li><a class="site-page child" href="/categories/Python"><i class="fa-fw fab fa-python"></i><span> Python</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%89%8D%E7%AB%AF"><i class="fa-fw fas fa-code"></i><span> 前端</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91"><i class="fa-fw fas fa-video-camera"></i><span> 音视频</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%95%E8%B5%84"><i class="fa-fw fa-solid fa-sack-dollar"></i><span> 投资</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E8%BF%90%E7%BB%B4"><i class="fa-fw fas fa-server"></i><span> 运维</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9A%8F%E7%AC%94"><i class="fa-fw fas fa-pencil"></i><span> 随笔</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%88%86%E4%BA%AB"><i class="fa-fw fas fa-share"></i><span> 分享</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Clang's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">ubuntu20.04安装ros noetic</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/AI"><i class="fa-fw fas fa-microchip"></i><span> AI</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 后端</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/Java"><i class="fa-fw fas fa-compass"></i><span> Java</span></a></li><li><a class="site-page child" href="/categories/Go"><i class="fa-fw fas fa-cloud"></i><span> Go</span></a></li><li><a class="site-page child" href="/categories/Python"><i class="fa-fw fab fa-python"></i><span> Python</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%89%8D%E7%AB%AF"><i class="fa-fw fas fa-code"></i><span> 前端</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91"><i class="fa-fw fas fa-video-camera"></i><span> 音视频</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%95%E8%B5%84"><i class="fa-fw fa-solid fa-sack-dollar"></i><span> 投资</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E8%BF%90%E7%BB%B4"><i class="fa-fw fas fa-server"></i><span> 运维</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9A%8F%E7%AC%94"><i class="fa-fw fas fa-pencil"></i><span> 随笔</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%88%86%E4%BA%AB"><i class="fa-fw fas fa-share"></i><span> 分享</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">ubuntu20.04安装ros noetic</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2024-06-15T09:56:17.000Z" title="发表于 2024-06-15 09:56:17">2024-06-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-10-28T11:06:54.981Z" title="更新于 2025-10-28 11:06:54">2025-10-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ROS/">ROS</a></span></div><div class="meta-secondline"></div></div></div><article class="container post-content" id="article-container"><h2 id="一、安装ROS-neotic步骤"><a href="#一、安装ROS-neotic步骤" class="headerlink" title="一、安装ROS neotic步骤"></a>一、安装ROS neotic步骤</h2><h3 id="第一步：换源（在软件和更新里面）"><a href="#第一步：换源（在软件和更新里面）" class="headerlink" title="第一步：换源（在软件和更新里面）"></a>第一步：换源（在软件和更新里面）</h3><p>这一步非常重要，决定着后面安装ROS能否成功的关键一步。<br>这里，我选择了中科大（<a target="_blank" rel="noopener" href="https://mirrors.ustc.edu.cn/ubuntu/%EF%BC%89%E3%80%82">https://mirrors.ustc.edu.cn/ubuntu/）。</a></p>
+<h3 id="第二步：添加ROS软件源"><a href="#第二步：添加ROS软件源" class="headerlink" title="第二步：添加ROS软件源"></a>第二步：添加ROS软件源</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo sh -c &#x27;echo &quot;deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main&quot; &gt; /etc/apt/sources.list.d/ros-latest.list&#x27;</span><br></pre></td></tr></table></figure>
+
+<h3 id="第三步：添加密钥"><a href="#第三步：添加密钥" class="headerlink" title="第三步：添加密钥"></a>第三步：添加密钥</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-key adv --keyserver &#x27;hkp://keyserver.ubuntu.com:80&#x27; --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654</span><br></pre></td></tr></table></figure>
+
+<h3 id="第四步：更新软件源"><a href="#第四步：更新软件源" class="headerlink" title="第四步：更新软件源"></a>第四步：更新软件源</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt update</span><br></pre></td></tr></table></figure>
+
+<h3 id="第五步：开始安装ROS"><a href="#第五步：开始安装ROS" class="headerlink" title="第五步：开始安装ROS"></a>第五步：开始安装ROS</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install ros-noetic-desktop-full</span><br></pre></td></tr></table></figure>
+
+<h3 id="第六步：设置-x2F-更新环境变量"><a href="#第六步：设置-x2F-更新环境变量" class="headerlink" title="第六步：设置&#x2F;更新环境变量"></a>第六步：设置&#x2F;更新环境变量</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;source /opt/ros/noetic/setup.bash&quot; &gt;&gt; ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">source ~/.bashrc</span><br></pre></td></tr></table></figure>
+
+<h3 id="第七步：安装ros所需工具"><a href="#第七步：安装ros所需工具" class="headerlink" title="第七步：安装ros所需工具"></a>第七步：安装ros所需工具</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install python3-rosinstall python3-rosinstall-generator python3-wstool build-essential python3-roslaunch</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、测试是否安装成功"><a href="#二、测试是否安装成功" class="headerlink" title="二、测试是否安装成功"></a>二、测试是否安装成功</h2><h3 id="第一步：终端里输入roscore"><a href="#第一步：终端里输入roscore" class="headerlink" title="第一步：终端里输入roscore"></a>第一步：终端里输入roscore</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">roscore</span><br></pre></td></tr></table></figure>
+
+<h3 id="第二步：重新打开终端输入"><a href="#第二步：重新打开终端输入" class="headerlink" title="第二步：重新打开终端输入"></a>第二步：重新打开终端输入</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosrun turtlesim turtlesim_node</span><br></pre></td></tr></table></figure>
+
+<h3 id="第三步：再重新打开终端输入"><a href="#第三步：再重新打开终端输入" class="headerlink" title="第三步：再重新打开终端输入"></a>第三步：再重新打开终端输入</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosrun turtlesim turtle_teleop_key</span><br></pre></td></tr></table></figure>
+<p>把鼠标放在第三步的界面上，然后通过上下左右方向键就可以控制小海龟的移动了。<br>至此，ros已经安装完成了。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://www.clang.asia">Clang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://www.clang.asia/2024/06/15/ubuntu20.04%E5%AE%89%E8%A3%85ros%20noetic/">https://www.clang.asia/2024/06/15/ubuntu20.04%E5%AE%89%E8%A3%85ros%20noetic/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://www.clang.asia" target="_blank">Clang's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ROS/">ROS</a></div><div class="post-share"><div class="social-share" data-image="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_8.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://unpkg.com/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://unpkg.com/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2024/05/18/ros1%20%E7%AE%80%E5%8D%95%E8%8A%82%E7%82%B9demo%EF%BC%88Python%EF%BC%89/" title="ROS简单节点demo（Python）"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_7.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">ROS简单节点demo（Python）</div></div><div class="info-2"><div class="info-item-1">好的，下面是将 talker_listener_demo 从C++版本转换为Python版本的详细步骤和代码示例： 步骤 1：创建ROS包在终端中执行以下命令： 1catkin_create_pkg talker_listener_demo rospy std_msgs  这将在你的Catkin工作空间中创建一个名为 talker_listener_demo 的ROS包，并将 rospy 和 std_msgs 添加为依赖项。 步骤 2：创建Python脚本在 src 文件夹下创建两个Python脚本：talker.py 和 listener.py。 123cd ~/catkin_ws/src/talker_listener_demo/srctouch talker.pytouch listener.py  步骤 3：编写Python节点代码编辑 talker.py 和 listener.py 文件，编写发布者节点和订阅者节点的Python代码。 talker.py：1234567891011121314151617181920#!/usr/bin/env...</div></div></div></a><a class="pagination-related" href="/2024/06/19/%E5%A6%82%E4%BD%95%E5%9C%A8%E4%B8%8D%E5%90%8C%E7%94%B5%E8%84%91%E4%B9%8B%E9%97%B4%E5%AF%BC%E5%87%BA%E5%92%8C%E5%AF%BC%E5%85%A5%20Docker%20%E9%95%9C%E5%83%8F/" title="如何在不同电脑之间导出和导入 Docker 镜像"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_1.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">如何在不同电脑之间导出和导入 Docker 镜像</div></div><div class="info-2"><div class="info-item-1">如何在不同电脑之间导出和导入 Docker 镜像在开发和部署过程中，你可能会遇到需要将 Docker 镜像从一台电脑导出并导入到另一台电脑的情况。无论是为了分享镜像，还是为了在不同环境中进行测试，Docker 都提供了方便的工具来实现这一需求。本文将详细介绍如何使用 docker save 和 docker load 命令将 Docker 镜像从一台电脑传输到另一台电脑。 步骤 1：导出镜像首先，在源电脑上使用 docker save 命令将 Docker 镜像保存为一个 tar 文件。假设你要导出的镜像名为 foxy_noetic_ubuntu20.04:v1，你可以运行以下命令： 1docker save -o foxy_noetic_ubuntu20.04_v1.tar foxy_noetic_ubuntu20.04:v1  这条命令会创建一个名为 foxy_noetic_ubuntu20.04_v1.tar 的文件，该文件包含了 foxy_noetic_ubuntu20.04:v1 镜像的所有内容。 步骤 2：传输镜像文件接下来，需要将生成的 tar...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/2024/04/23/ROS%E8%87%AA%E5%AE%9A%E4%B9%89Msg%E6%B6%88%E6%81%AF/" title="ROS自定义Msg消息"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_1.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-04-23</div><div class="info-item-2">ROS自定义Msg消息</div></div><div class="info-2"><div class="info-item-1">自定义消息流程在Ros中，如果没有现成的消息类型来描述要去传递的消息时，我们会自定义消息。 通常我们会新建一个Package来去自定义消息，这个Package一般不去写任何的业务逻辑，只是用来声明自定义的消息类型，可以只定义一种消息类型，也可以定义多种消息类型，根据业务需求来定。 所以，首先我们单独的创建一个package，我们取名为demo_msgs，一定要要添加roscpp，rospy，rosmsg的依赖。 1 . 创建msg目录在pakage目录下新建msg目录 2. 新建msg文件创建的这个Student.msg文件就是自定义消息文件，需要去描述消息的格式。 我们可以编辑代码如下 12string nameint64 age 这个自定义的消息包含两个数据形式，name和age，name的类型 是string，age的类型是int64。 这个msg文件其实遵循一定规范的，每一行表示一种数据。前面是类型，后面是名称。 ros不只是提供了int64和string两种基本类型供我们描述，其实还有很多，具体可以自行搜索 3....</div></div></div></a><a class="pagination-related" href="/2024/05/17/ros1%20%E7%AE%80%E5%8D%95%E8%8A%82%E7%82%B9demo%EF%BC%88C++%EF%BC%89/" title="ROS简单节点demo（C++）"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_10.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-17</div><div class="info-item-2">ROS简单节点demo（C++）</div></div><div class="info-2"><div class="info-item-1">下面是一个简单的 ROS 1 demo，包括创建一个 Catkin 工作空间、创建一个 ROS 节点以发布一个字符串消息到一个话题上，并创建一个订阅器来接收并打印这个消息。这个 demo 包含两个文件：CMakeLists.txt 和 talker_listener_demo.cpp。 首先，创建一个 Catkin 工作空间：  打开终端。 运行以下命令，创建一个名为 catkin_ws 的 Catkin 工作空间： 123mkdir -p ~/catkin_ws/srccd ~/catkin_ws/srccatkin_init_workspace  接下来，创建 ROS 节点和订阅器的源文件：  在 ~/catkin_ws/src 目录下创建一个名为 talker_listener_demo 的包，并进入该目录：  123cd ~/catkin_ws/srccatkin_create_pkg talker_listener_demo roscpp std_msgscd talker_listener_demo  在 talker_listener_demo 包中创建一个名为...</div></div></div></a><a class="pagination-related" href="/2024/05/18/ros1%20%E7%AE%80%E5%8D%95%E8%8A%82%E7%82%B9demo%EF%BC%88Python%EF%BC%89/" title="ROS简单节点demo（Python）"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_7.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-18</div><div class="info-item-2">ROS简单节点demo（Python）</div></div><div class="info-2"><div class="info-item-1">好的，下面是将 talker_listener_demo 从C++版本转换为Python版本的详细步骤和代码示例： 步骤 1：创建ROS包在终端中执行以下命令： 1catkin_create_pkg talker_listener_demo rospy std_msgs  这将在你的Catkin工作空间中创建一个名为 talker_listener_demo 的ROS包，并将 rospy 和 std_msgs 添加为依赖项。 步骤 2：创建Python脚本在 src 文件夹下创建两个Python脚本：talker.py 和 listener.py。 123cd ~/catkin_ws/src/talker_listener_demo/srctouch talker.pytouch listener.py  步骤 3：编写Python节点代码编辑 talker.py 和 listener.py 文件，编写发布者节点和订阅者节点的Python代码。 talker.py：1234567891011121314151617181920#!/usr/bin/env...</div></div></div></a><a class="pagination-related" href="/2024/11/19/%E4%BD%BF%E7%94%A8GeographicLib%E5%9C%A8C-%E4%B8%AD%E8%BF%9B%E8%A1%8C%E5%9C%B0%E7%90%86%E5%9D%90%E6%A0%87%E8%BD%AC%E6%8D%A2/" title="使用GeographicLib在C++中进行地理坐标转换"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_9.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-19</div><div class="info-item-2">使用GeographicLib在C++中进行地理坐标转换</div></div><div class="info-2"><div class="info-item-1">使用GeographicLib在C++中进行地理坐标转换在现代软件开发中，经常需要处理地理坐标转换问题，例如将经纬度转换为局部直角坐标系。GeographicLib是一个强大的开源库，提供了便捷的工具来进行这些转换。本文将介绍如何在C++项目中使用GeographicLib进行地理坐标转换的步骤和示例代码。 步骤一：安装GeographicLib首先，确保你的系统中已安装GeographicLib库。可以通过以下命令在Ubuntu中安装： 12sudo apt-get install geographiclib-*   # 安装GeographicLib的库sudo apt-get install libgeographic-*  # 安装GeographicLib的依赖库  步骤二：配置C++项目在你的C++项目中，需要配置CMake以及链接GeographicLib库。CMakeLists.txt 123456789101112131415cmake_minimum_required(VERSION 3.5)set(CMAKE_CXX_STANDARD 11)#...</div></div></div></a><a class="pagination-related" href="/2024/11/20/%E5%9F%BA%E4%BA%8EC-%E7%BA%BF%E7%A8%8B%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86%E7%9A%84-ROS-%E6%B6%88%E6%81%AF%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96/" title="基于C++线程延迟处理的 ROS 消息逻辑优化"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_5.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-11-20</div><div class="info-item-2">基于C++线程延迟处理的 ROS 消息逻辑优化</div></div><div class="info-2"><div class="info-item-1">基于线程延迟处理的 ROS 消息逻辑优化在 ROS 开发中，我们常常需要对某些消息的处理逻辑进行优化。例如，某个话题的消息可能会频繁发布，而我们希望在消息连续时推迟某些操作，只有在消息停止后一定时间才触发特定逻辑。这种场景可以通过线程延迟处理机制实现。 本文以一个电笛控制系统为例，讲解如何通过线程延迟机制优化 ROS 的消息处理逻辑。  需求场景 话题 /electric_horn 的消息以 std_msgs::Bool 类型发布，表示是否按下电笛按钮。 当消息连续时，不执行心跳操作 HeartBeat。 当最后一条消息超过 1 秒未更新时，触发 HeartBeat。   实现思路 延迟触发机制通过记录最近一次收到消息的时间，启动一个独立的线程监控消息间隔。只有当消息停止（超过 1 秒未更新）后，才触发 HeartBeat 操作。  线程控制使用 std::thread 来实现延迟触发逻辑，同时通过 std::atomic...</div></div></div></a><a class="pagination-related" href="/2024/05/14/%E7%BC%96%E5%86%99%E4%B8%8E%E6%B5%8B%E8%AF%95%E7%AE%80%E5%8D%95%E7%9A%84Service%E5%92%8CClient%EF%BC%88Python%EF%BC%89/" title="编写与测试简单的Service和Client（Python）"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_3.png" alt="cover"><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2024-05-14</div><div class="info-item-2">编写与测试简单的Service和Client（Python）</div></div><div class="info-2"><div class="info-item-1">01 导读C++ 代码必须通过编译生成可执行文件； python 代码是可执行文件，不需要编译；  开发的功能包都放在 catkin_ws 这样一个工作空间里； 新建的功能包取名为 service_example，实现两个整数求和为例，client 端节点向 server 端节点发送 a、b 的请求，server 端节点返回响应 sum&#x3D;a+b 给 client 端节点；  服务编程流程  创建服务器 创建客户端 添加编译选项 运行可执行程序  02 功能包的创建在 catkin_ws&#x2F;src&#x2F; 目录下新建功能包 service_example，并在创建时显式的指明依赖 rospy 和 std_msgs，依赖 std_msgs 将作为基本数据类型用于定义我们的服务类型。打开命令行终端，输入命令： 12345$ cd ~/catkin_ws/src# 创建功能包 topic_example 时，显式的指明依赖 rospy 和 std_msgs，# 依赖会被默认写到功能包的 CMakeLists.txt 和 package.xml 中$...</div></div></div></a></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Clang</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/chenhu1001"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/chenhu1001" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:chenhu656719@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">如果尚未看到成果，那是因为付出的努力还不够多，如果尚未梦想成真，那是因为等待的时间还不够久。笑到最后的人永远最精彩，最成功，最执着。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E5%AE%89%E8%A3%85ROS-neotic%E6%AD%A5%E9%AA%A4"><span class="toc-number">1.</span> <span class="toc-text">一、安装ROS neotic步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E6%8D%A2%E6%BA%90%EF%BC%88%E5%9C%A8%E8%BD%AF%E4%BB%B6%E5%92%8C%E6%9B%B4%E6%96%B0%E9%87%8C%E9%9D%A2%EF%BC%89"><span class="toc-number">1.1.</span> <span class="toc-text">第一步：换源（在软件和更新里面）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E6%B7%BB%E5%8A%A0ROS%E8%BD%AF%E4%BB%B6%E6%BA%90"><span class="toc-number">1.2.</span> <span class="toc-text">第二步：添加ROS软件源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E6%B7%BB%E5%8A%A0%E5%AF%86%E9%92%A5"><span class="toc-number">1.3.</span> <span class="toc-text">第三步：添加密钥</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E6%9B%B4%E6%96%B0%E8%BD%AF%E4%BB%B6%E6%BA%90"><span class="toc-number">1.4.</span> <span class="toc-text">第四步：更新软件源</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E5%BC%80%E5%A7%8B%E5%AE%89%E8%A3%85ROS"><span class="toc-number">1.5.</span> <span class="toc-text">第五步：开始安装ROS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A%E8%AE%BE%E7%BD%AE-x2F-%E6%9B%B4%E6%96%B0%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">1.6.</span> <span class="toc-text">第六步：设置&#x2F;更新环境变量</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%83%E6%AD%A5%EF%BC%9A%E5%AE%89%E8%A3%85ros%E6%89%80%E9%9C%80%E5%B7%A5%E5%85%B7"><span class="toc-number">1.7.</span> <span class="toc-text">第七步：安装ros所需工具</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BA%8C%E3%80%81%E6%B5%8B%E8%AF%95%E6%98%AF%E5%90%A6%E5%AE%89%E8%A3%85%E6%88%90%E5%8A%9F"><span class="toc-number">2.</span> <span class="toc-text">二、测试是否安装成功</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E7%BB%88%E7%AB%AF%E9%87%8C%E8%BE%93%E5%85%A5roscore"><span class="toc-number">2.1.</span> <span class="toc-text">第一步：终端里输入roscore</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E9%87%8D%E6%96%B0%E6%89%93%E5%BC%80%E7%BB%88%E7%AB%AF%E8%BE%93%E5%85%A5"><span class="toc-number">2.2.</span> <span class="toc-text">第二步：重新打开终端输入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E5%86%8D%E9%87%8D%E6%96%B0%E6%89%93%E5%BC%80%E7%BB%88%E7%AB%AF%E8%BE%93%E5%85%A5"><span class="toc-number">2.3.</span> <span class="toc-text">第三步：再重新打开终端输入</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/06/08/%E4%B8%80%E9%94%AE%E6%90%AD%E5%BB%BA-WordPress-MySQL-phpMyAdmin-%E7%8E%AF%E5%A2%83%EF%BC%88%E6%94%AF%E6%8C%81-PHP-%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9-%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%EF%BC%89/" title="一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）"/></a><div class="content"><a class="title" href="/2025/06/08/%E4%B8%80%E9%94%AE%E6%90%AD%E5%BB%BA-WordPress-MySQL-phpMyAdmin-%E7%8E%AF%E5%A2%83%EF%BC%88%E6%94%AF%E6%8C%81-PHP-%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9-%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%EF%BC%89/" title="一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）">一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）</a><time datetime="2025-06-08T16:18:06.000Z" title="发表于 2025-06-08 16:18:06">2025-06-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/02/16/AI%E7%BD%91%E5%9D%80%E5%A4%A7%E5%85%A8/" title="AI网址大全"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_8.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI网址大全"/></a><div class="content"><a class="title" href="/2025/02/16/AI%E7%BD%91%E5%9D%80%E5%A4%A7%E5%85%A8/" title="AI网址大全">AI网址大全</a><time datetime="2025-02-16T15:38:10.000Z" title="发表于 2025-02-16 15:38:10">2025-02-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/11/20/%E5%9F%BA%E4%BA%8EC-%E7%BA%BF%E7%A8%8B%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86%E7%9A%84-ROS-%E6%B6%88%E6%81%AF%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96/" title="基于C++线程延迟处理的 ROS 消息逻辑优化"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_5.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于C++线程延迟处理的 ROS 消息逻辑优化"/></a><div class="content"><a class="title" href="/2024/11/20/%E5%9F%BA%E4%BA%8EC-%E7%BA%BF%E7%A8%8B%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86%E7%9A%84-ROS-%E6%B6%88%E6%81%AF%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96/" title="基于C++线程延迟处理的 ROS 消息逻辑优化">基于C++线程延迟处理的 ROS 消息逻辑优化</a><time datetime="2024-11-20T06:46:27.000Z" title="发表于 2024-11-20 06:46:27">2024-11-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/11/19/%E4%BD%BF%E7%94%A8-Docker-%E8%BF%90%E8%A1%8C-Node-js%EF%BC%9A%E6%97%A0%E9%9C%80%E4%BE%9D%E8%B5%96%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC%EF%BC%8C%E5%BF%AB%E9%80%9F%E5%88%87%E6%8D%A2%E3%80%81%E7%8E%AF%E5%A2%83%E9%9A%94%E7%A6%BB/" title="使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_3.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离"/></a><div class="content"><a class="title" href="/2024/11/19/%E4%BD%BF%E7%94%A8-Docker-%E8%BF%90%E8%A1%8C-Node-js%EF%BC%9A%E6%97%A0%E9%9C%80%E4%BE%9D%E8%B5%96%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC%EF%BC%8C%E5%BF%AB%E9%80%9F%E5%88%87%E6%8D%A2%E3%80%81%E7%8E%AF%E5%A2%83%E9%9A%94%E7%A6%BB/" title="使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离">使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离</a><time datetime="2024-11-19T10:21:15.000Z" title="发表于 2024-11-19 10:21:15">2024-11-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/11/19/Python%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E4%B8%8E%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" title="Python多进程编程与进程间通信"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_10.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python多进程编程与进程间通信"/></a><div class="content"><a class="title" href="/2024/11/19/Python%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E4%B8%8E%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" title="Python多进程编程与进程间通信">Python多进程编程与进程间通信</a><time datetime="2024-11-19T06:44:05.000Z" title="发表于 2024-11-19 06:44:05">2024-11-19</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2016 - 2025 By Clang</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 6.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.3</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: 'I7JKJGOjUYSriGoASwXxl3bU-gzGzoHsz',
+      appKey: 'gnJRTHhU20o70y1RBVFQ4N4Q',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://unpkg.com/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script defer="defer" id="ribbon" src="https://unpkg.com/butterfly-extsrc/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script></div></body></html>

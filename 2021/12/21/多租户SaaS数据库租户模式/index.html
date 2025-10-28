@@ -1,0 +1,364 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>多租户SaaS数据库租户模式 | Clang's Blog</title><meta name="author" content="Clang"><meta name="copyright" content="Clang"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本文介绍可用于多租户 SaaS 应用程序的各种租户模型。 在设计多租户 SaaS 应用程序时，必须慎重选择最符合应用程序需要的租户模型。 租户模型确定如何将每个租户的数据映射到存储。 所选的租户模型会影响应用程序设计和管理。 今后改用不同的模型可能需要付出一定的代价。 A. SaaS 概念和术语在软件即服务 (SaaS) 模型中，贵公司不会销售软件的 许可证。 而是，每个客户都会向贵公司支付租金，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="多租户SaaS数据库租户模式">
+<meta property="og:url" content="https://www.clang.asia/2021/12/21/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="Clang&#39;s Blog">
+<meta property="og:description" content="本文介绍可用于多租户 SaaS 应用程序的各种租户模型。 在设计多租户 SaaS 应用程序时，必须慎重选择最符合应用程序需要的租户模型。 租户模型确定如何将每个租户的数据映射到存储。 所选的租户模型会影响应用程序设计和管理。 今后改用不同的模型可能需要付出一定的代价。 A. SaaS 概念和术语在软件即服务 (SaaS) 模型中，贵公司不会销售软件的 许可证。 而是，每个客户都会向贵公司支付租金，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_7.png">
+<meta property="article:published_time" content="2021-12-21T14:43:01.000Z">
+<meta property="article:modified_time" content="2025-10-28T11:06:54.983Z">
+<meta property="article:author" content="Clang">
+<meta property="article:tag" content="多租户">
+<meta property="article:tag" content="SaaS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_7.png"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "多租户SaaS数据库租户模式",
+  "url": "https://www.clang.asia/2021/12/21/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F/",
+  "image": "https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_7.png",
+  "datePublished": "2021-12-21T14:43:01.000Z",
+  "dateModified": "2025-10-28T11:06:54.983Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "Clang",
+      "url": "https://www.clang.asia/"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://www.clang.asia/2021/12/21/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F/index.html"><link rel="preconnect" href="//unpkg.com"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//static.cloudflareinsights.com"/><link rel="preconnect" href="//www.clarity.ms"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://unpkg.com/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script async="async" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script><script>(adsbygoogle = window.adsbygoogle || []).push({
+  google_ad_client: 'ca-pub-9329019376666398',
+  enable_page_level_ads: 'true'
+});</script><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?fd1f2eae75bb4a079b4b9730ab6f647d";
+  var s = document.getElementsByTagName("script")[0];
+  s.parentNode.insertBefore(hm, s);
+})();
+btf.addGlobalFn('pjaxComplete', () => {
+  _hmt.push(['_trackPageview',window.location.pathname])
+}, 'baidu_analytics')
+</script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-NJP2QJBR4D"></script><script>window.dataLayer = window.dataLayer || []
+function gtag(){dataLayer.push(arguments)}
+gtag('js', new Date())
+gtag('config', 'G-NJP2QJBR4D')
+btf.addGlobalFn('pjaxComplete', () => {
+  gtag('config', 'G-NJP2QJBR4D', {'page_path': window.location.pathname})
+}, 'google_analytics')
+</script><script defer="defer" data-pjax="data-pjax" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;fa1cb58cb1ec4e1f845351de70b52d1f&quot;}"></script><script>(function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window, document, "clarity", "script", "gpbipe06m1");</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://unpkg.com/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '多租户SaaS数据库租户模式',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><meta name="generator" content="Hexo 6.3.0"><link rel="alternate" href="/atom.xml" title="Clang's Blog" type="application/atom+xml">
+</head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/AI"><i class="fa-fw fas fa-microchip"></i><span> AI</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 后端</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/Java"><i class="fa-fw fas fa-compass"></i><span> Java</span></a></li><li><a class="site-page child" href="/categories/Go"><i class="fa-fw fas fa-cloud"></i><span> Go</span></a></li><li><a class="site-page child" href="/categories/Python"><i class="fa-fw fab fa-python"></i><span> Python</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%89%8D%E7%AB%AF"><i class="fa-fw fas fa-code"></i><span> 前端</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91"><i class="fa-fw fas fa-video-camera"></i><span> 音视频</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%95%E8%B5%84"><i class="fa-fw fa-solid fa-sack-dollar"></i><span> 投资</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E8%BF%90%E7%BB%B4"><i class="fa-fw fas fa-server"></i><span> 运维</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9A%8F%E7%AC%94"><i class="fa-fw fas fa-pencil"></i><span> 随笔</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%88%86%E4%BA%AB"><i class="fa-fw fas fa-share"></i><span> 分享</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="not-top-img" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">Clang's Blog</span></a><a class="nav-page-title" href="/"><span class="site-name">多租户SaaS数据库租户模式</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/categories/AI"><i class="fa-fw fas fa-microchip"></i><span> AI</span></a></div><div class="menus_item"><span class="site-page group"><i class="fa-fw fas fa-list"></i><span> 后端</span><i class="fas fa-chevron-down"></i></span><ul class="menus_item_child"><li><a class="site-page child" href="/categories/Java"><i class="fa-fw fas fa-compass"></i><span> Java</span></a></li><li><a class="site-page child" href="/categories/Go"><i class="fa-fw fas fa-cloud"></i><span> Go</span></a></li><li><a class="site-page child" href="/categories/Python"><i class="fa-fw fab fa-python"></i><span> Python</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/categories/%E5%89%8D%E7%AB%AF"><i class="fa-fw fas fa-code"></i><span> 前端</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9F%B3%E8%A7%86%E9%A2%91"><i class="fa-fw fas fa-video-camera"></i><span> 音视频</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E6%8A%95%E8%B5%84"><i class="fa-fw fa-solid fa-sack-dollar"></i><span> 投资</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E8%BF%90%E7%BB%B4"><i class="fa-fw fas fa-server"></i><span> 运维</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E9%9A%8F%E7%AC%94"><i class="fa-fw fas fa-pencil"></i><span> 随笔</span></a></div><div class="menus_item"><a class="site-page" href="/categories/%E5%88%86%E4%BA%AB"><i class="fa-fw fas fa-share"></i><span> 分享</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav></header><main class="layout" id="content-inner"><div id="post"><div id="post-info"><h1 class="post-title">多租户SaaS数据库租户模式</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2021-12-21T14:43:01.000Z" title="发表于 2021-12-21 14:43:01">2021-12-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-10-28T11:06:54.983Z" title="更新于 2025-10-28 11:06:54">2025-10-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"></div></div></div><article class="container post-content" id="article-container"><p>本文介绍可用于多租户 SaaS 应用程序的各种租户模型。</p>
+<p>在设计多租户 SaaS 应用程序时，必须慎重选择最符合应用程序需要的租户模型。 租户模型确定如何将每个租户的数据映射到存储。 所选的租户模型会影响应用程序设计和管理。 今后改用不同的模型可能需要付出一定的代价。</p>
+<h1 id="A-SaaS-概念和术语"><a href="#A-SaaS-概念和术语" class="headerlink" title="A. SaaS 概念和术语"></a>A. SaaS 概念和术语</h1><p>在软件即服务 (SaaS) 模型中，贵公司不会销售软件的 许可证。 而是，每个客户都会向贵公司支付租金，使每个客户成为贵公司的 租户。</p>
+<p>作为支付租金的回报，每个租户都可以访问 SaaS 应用程序组件，并将数据存储在 SaaS 系统中。</p>
+<p>术语 租户模型 是指租户存储数据的组织方式：</p>
+<ul>
+<li>单租户：  每个数据库仅存储来自一个租户的数据。</li>
+<li>多租户：  每个数据库都存储来自多个独立租户的数据（使用保护数据隐私的机制）。</li>
+<li>混合租户模式也可用。</li>
+</ul>
+<h1 id="B-如何选择适当的租户模型"><a href="#B-如何选择适当的租户模型" class="headerlink" title="B. 如何选择适当的租户模型"></a>B. 如何选择适当的租户模型</h1><p>一般情况下，租户模型不会影响应用程序的功能，但可能会影响总体解决方案的其他方面。 以下条件用于评估每个模型：</p>
+<ul>
+<li><p><strong>可伸缩性：</strong></p>
+<ul>
+<li>租户数目。</li>
+<li>每个租户的存储量。</li>
+<li>总存储量。</li>
+<li>工作负荷。</li>
+</ul>
+</li>
+<li><p>租户隔离：数据隔离和性能（一个租户的工作负荷是否影响其他租户）。</p>
+</li>
+<li><p><strong>每个租户的成本：</strong>  数据库成本。</p>
+</li>
+<li><p><strong>开发复杂性：</strong></p>
+<ul>
+<li>架构更改。</li>
+<li>查询更改（模式所需）。</li>
+</ul>
+</li>
+<li><p><strong>操作复杂性：</strong></p>
+<ul>
+<li>监视和管理性能。</li>
+<li>架构管理。</li>
+<li>还原租户。</li>
+<li>灾难恢复。</li>
+</ul>
+</li>
+<li><p><strong>可自定义性：</strong>  易于支持租户特定或租户类特定的架构自定义。</p>
+</li>
+</ul>
+<p>有关租户的讨论侧重于数据层。 但是，请花费片刻时间思考一下应用程序层。 应用程序层被视为单一实体。 如果将应用程序划分成多个小型组件，所选的租户模型可能会更改。 在所用的租户和存储技术或平台方面，可以不同的方式对待某些组件。</p>
+<h1 id="C-包含单租户数据库的独立单租户应用"><a href="#C-包含单租户数据库的独立单租户应用" class="headerlink" title="C. 包含单租户数据库的独立单租户应用"></a>C. 包含单租户数据库的独立单租户应用</h1><h2 id="应用程序级隔离"><a href="#应用程序级隔离" class="headerlink" title="应用程序级隔离"></a>应用程序级隔离</h2><p>在此模型中，针对每个租户重复安装整个应用程序一次。 应用的每个实例是独立实例，因此，它永远不与其他任何独立实例交互。 应用的每个实例只有一个租户，因此只需要一个数据库。 租户包含自身的整个数据库。<br><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/2021/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F_1.png-watermark" alt="在这里插入图片描述"><br>每个应用实例安装在单独的 Azure 资源组中。 该资源组可以属于软件供应商或租户拥有的订阅。 在任一情况下，供应商可为租户管理软件。 每个应用程序实例已配置为连接到其相应的数据库。</p>
+<p>每个租户数据库都部署为单一数据库。 此模型提供最佳的数据库隔离性。 但是，隔离需要向每个数据库分配足够的资源来处理数据库峰值负载。 此处的一个要点是，无法对不同资源组中部署的数据库或不同的订阅使用弹性池。 从总体数据库成本的角度看，这种限制使得这种独立单租户应用模型成了最昂贵的解决方案。</p>
+<h2 id="供应商管理"><a href="#供应商管理" class="headerlink" title="供应商管理"></a>供应商管理</h2><p>供应商可以访问所有独立应用实例中的所有数据库，即使应用实例安装在不同的租户订阅中。 访问是通过 SQL 连接实现的。 这种跨实例访问可让供应商出于报告或分析目的，在集中位置进行架构管理和跨数据库查询。 如果需要此类集中化管理，必须部署一个可将租户标识符映射到数据库 URI 的目录。 Azure SQL Database 提供了一个分片库，用于提供目录。 该分片库的正式名称为弹性数据库客户端库。</p>
+<h1 id="D-采用“每个租户各有数据库”模型的多租户应用"><a href="#D-采用“每个租户各有数据库”模型的多租户应用" class="headerlink" title="D. 采用“每个租户各有数据库”模型的多租户应用"></a>D. 采用“每个租户各有数据库”模型的多租户应用</h1><p>接下来的这个模式使用包含许多数据库的多租户应用程序，这些数据库都是单租户数据库。 针对每个新租户预配一个新数据库。 可通过为每个节点添加更多的资源来纵向扩展应用程序层。 或者，可通过添加更多的节点来横向扩展应用。 缩放基于工作负荷，不受各个数据库的数目或规模的影响。<br><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/2021/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F_2.png-watermark" alt="在这里插入图片描述"></p>
+<h2 id="根据租户进行自定义"><a href="#根据租户进行自定义" class="headerlink" title="根据租户进行自定义"></a>根据租户进行自定义</h2><p>与独立应用模式一样，使用单租户数据库可提供强大的租户隔离性。 在其模型仅指定了单租户数据库的任何应用中，可以根据任一给定数据库的租户自定义和优化该数据库的架构。 这种自定义不会影响应用中的其他租户。 某个租户所需的数据可能超过了所有租户所需的基本数据字段。 此外，附加的数据字段可能需要索引。</p>
+<p>使用“每个租户各有数据库”模型，可以直截了当地定义一个或多个租户的架构。 应用程序供应商必须设计适当的过程，以慎重地大规模管理架构自定义。</p>
+<h2 id="弹性池"><a href="#弹性池" class="headerlink" title="弹性池"></a>弹性池</h2><p>如果将数据库部署在同一个资源组中，可将其分组到弹性池。 通过池可以经济高效地在许多数据库之间共享资源。 与创建足够大的数据库来适应它所遇到的用量高峰相比，使用这种池选项的成本更低廉。 即使共用数据库共享资源访问权限，也仍能实现较高程度的性能隔离。<br><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/2021/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F_3.png-watermark" alt="在这里插入图片描述"><br>Azure SQL 数据库提供所需的工具用于配置、监视和管理共享。 可在 Azure 门户中查看池级别和数据库级性能指标，也可以通过 Azure Monitor 日志查看。 指标可以提供聚合性能和租户特定性能的深入见解。 可以在池之间移动单个数据库，以便向特定的租户提供保留的资源。 使用这些工具可确保以经济高效的方式获得良好性能。</p>
+<h2 id="“每个租户各有数据库”模型的操作规模"><a href="#“每个租户各有数据库”模型的操作规模" class="headerlink" title="“每个租户各有数据库”模型的操作规模"></a>“每个租户各有数据库”模型的操作规模</h2><p>Azure SQL 数据库提供多种管理功能，用于大规模管理大量数据库（例如 100,000 以上的数据库）。 这些功能使“每个租户各有数据库”模式变得合理。</p>
+<p>例如，假设某个系统使用一个包含 1000 个租户的数据库作为其唯一的数据库。 该数据库可能包含 20 个索引。 如果该系统改用 1000 个单租户数据库，则索引数量会提高到 20,000 个。 在自动优化过程中，默认会在 Azure SQL 数据库中启用自动索引功能。 自动索引会自动管理所有 20,000 个索引，以及这些索引的持续创建和删除优化操作。 这些自动操作发生在单个数据库内部，不受其他数据库中类似操作的协调或限制。 自动索引在繁忙数据库中处理索引的方式与在不太繁忙的数据库中不同。 如果必须手动完成这种异常繁重的管理任务，则以“每个租户各有数据库”规模进行这种索引管理自定义是不切实际的。</p>
+<p>其他可以正常缩放的管理功能包括：</p>
+<ul>
+<li>内置备份。</li>
+<li>高可用性。</li>
+<li>磁盘中加密。</li>
+<li>性能遥测。</li>
+</ul>
+<h2 id="自动化"><a href="#自动化" class="headerlink" title="自动化"></a>自动化</h2><p>可以编写管理操作的脚本，并通过 devops 模型提供这些操作。 甚至可以在应用程序中自动化和公开操作。</p>
+<p>例如，可将单个租户自动恢复到以前的某个时间点。 恢复操作只需还原一个存储租户的单租户数据库。 此还原操作不会影响其他租户，确保以每个租户的粒度级完成管理操作。</p>
+<h1 id="E-包含多租户数据库的多租户应用"><a href="#E-包含多租户数据库的多租户应用" class="headerlink" title="E. 包含多租户数据库的多租户应用"></a>E. 包含多租户数据库的多租户应用</h1><p>另一种可用模式是在一个多租户数据库中存储许多租户。 应用程序实例可以包含任意数量的多租户数据库。 多租户数据库的架构必须包含一个或多个租户标识符列，以便能够选择性地检索任意给定租户中的数据。 此外，该架构可能需要几个只由一部分租户使用的表或列。 但是，静态代码和引用数据只会存储一次，并由所有租户共享。</p>
+<h2 id="丧失租户隔离性"><a href="#丧失租户隔离性" class="headerlink" title="丧失租户隔离性"></a>丧失租户隔离性</h2><p>数据：  使用多租户数据库势必会丧失租户隔离性。 多个租户的数据统一存储在一个数据库中。 在开发期间，需确保查询永远不会公开多个租户中的数据。 SQL 数据库支持行级安全性，这种安全性可以强制某个查询返回的数据划归到单个租户。</p>
+<p>处理：  多租户数据库在其所有租户之间共享计算和存储资源。 可将数据库作为一个整体进行监视，确保其性能可接受。 但是，Azure 系统不提供内置的方式来监视或管理单个租户对这些资源的使用。 因此，多租户数据库增大了遇到干扰性邻居的风险：一个过度活跃的租户的工作负荷影响同一数据库中其他租户的性能体验。 其他应用程序级监视可以监视租户级性能。</p>
+<h2 id="成本更低"><a href="#成本更低" class="headerlink" title="成本更低"></a>成本更低</h2><p>一般而言，多租户数据库的每租户成本最低。 单一数据库的资源成本比同等大小的弹性池的成本更低。 此外，在租户只需有限存储的情况下，有可能会将数百万个租户存储在单个数据库中。 没有任何弹性池可以包含数百万个数据库。 但是，使用包含 1000 个池、每个池包含 1000 个数据库的解决方案可以实现百万量级的规模，而风险是管理变得复杂。</p>
+<p>下面介绍多租户数据库模型的两种变体，其中，分片多租户模型是灵活性和可伸缩性最高的模型。</p>
+<h1 id="F-包含单个多租户数据库的多租户应用"><a href="#F-包含单个多租户数据库的多租户应用" class="headerlink" title="F. 包含单个多租户数据库的多租户应用"></a>F. 包含单个多租户数据库的多租户应用</h1><p>最简单的多租户数据库模式使用单一数据库来托管所有租户的数据。 添加更多的租户时，该数据库会使用更多的存储和计算资源进行纵向扩展。 通过这种纵向扩展也许能够做到高枕无忧，不过，规模始终有一个最终的限制。 但是，在远远未达到该限制之前，数据库可能就会变得难以管理。</p>
+<p>在多租户数据库中，侧重于单个租户的管理操作更难实现。 大规模执行这些操作可能会使速度变得非常缓慢，让人无法接受。 一个例子是只是对一个租户的数据执行时间点还原。</p>
+<h1 id="G-包含分片多租户数据库的多租户应用"><a href="#G-包含分片多租户数据库的多租户应用" class="headerlink" title="G. 包含分片多租户数据库的多租户应用"></a>G. 包含分片多租户数据库的多租户应用</h1><p>大多数 SaaS 应用程序每次只访问一个租户的数据。 使用此访问模式可在多个数据库或分片之间分布租户数据，其中，任一租户的所有数据包含在一个分片中。 将分片模型与多租户数据库模式相结合可以实现几乎无限的规模。<br><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/2021/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F_4.png-watermark" alt="在这里插入图片描述"></p>
+<h2 id="管理分片"><a href="#管理分片" class="headerlink" title="管理分片"></a>管理分片</h2><p>分片增大了设计和操作管理的复杂性。 需要在目录中维护租户与数据库之间的映射。 此外，需要执行管理过程来管理分片和租户填充。 例如，必须设计相应的过程来添加和删除分片，以及在分片之间移动租户数据。 一种缩放方式是添加一个新分片并在其中填充新租户。 在其他时候，可将密集填充的分片拆分成两个不太密实的分片。 移动或停用多个租户后，可将稀疏填充的分片合并在一起。 合并会导致资源利用变得更加经济高效。 还可以在分片之间移动租户，以均衡工作负荷。</p>
+<p>SQL 数据库提供一个可与分片库和目录数据库结合使用的拆分&#x2F;合并工具。 提供的应用可以拆分与合并分片，并可以在分片之间移动租户数据。 应用还会在执行这些操作期间维护目录，将受影响的租户标记为已脱机，然后移动这些租户。 移动后，应用会使用新映射再次更新目录，并将租户标记为已重新联机。</p>
+<h2 id="小型数据库更易于管理"><a href="#小型数据库更易于管理" class="headerlink" title="小型数据库更易于管理"></a>小型数据库更易于管理</h2><p>通过在多个数据库之间分配租户，分片多租户解决方案可以生成更易于管理的小型数据库。 例如，将特定的租户还原到以前的某个时间点现在涉及到从备份中还原单个小型数据库，而不是从包含所有租户的大型数据库中还原。 可以选择数据库大小以及每个数据库的租户数，以均衡工作负荷与管理工作量。</p>
+<h2 id="架构中的租户标识符"><a href="#架构中的租户标识符" class="headerlink" title="架构中的租户标识符"></a>架构中的租户标识符</h2><p>根据所用的分片方法，可能需要对数据库架构施加更多的约束。 SQL 数据库拆分&#x2F;合并应用程序要求架构包含分片键，这通常是租户标识符。 租户标识符是所有分片表的主键中的前导元素。 租户标识符可让拆分&#x2F;合并应用程序快速找到和移动与特定租户关联的数据。</p>
+<h2 id="分片的弹性池"><a href="#分片的弹性池" class="headerlink" title="分片的弹性池"></a>分片的弹性池</h2><p>可将分片多租户数据库放在弹性池中。 一般而言，在一个池中放置许多单租户数据库，与在少量多租户数据库中放置许多租户的经济高效性相当。 当有大量的相对不活跃租户时，多租户数据库就很有优势。</p>
+<h1 id="H-混合分片多租户数据库模型"><a href="#H-混合分片多租户数据库模型" class="headerlink" title="H. 混合分片多租户数据库模型"></a>H. 混合分片多租户数据库模型</h1><p>在混合模型中，所有数据库在其架构中包含租户标识符。 这些数据库都能存储多个租户，并且可以分片。 因此，在架构的意义上，它们都是多租户数据库。 但实际上，其中一些数据库只包含一个租户。 不管怎样，给定数据库中存储的租户数量不会对数据库架构造成影响。</p>
+<h2 id="移动租户"><a href="#移动租户" class="headerlink" title="移动租户"></a>移动租户</h2><p>随时可将特定的租户移到其自身的多租户数据库中。 也随时可以改变主意，将租户移回到包含多个租户的数据库中。 此外，在预配新数据库时，还可将租户分配到新的单租户数据库中。</p>
+<p>当可识别的租户组的资源需求有很大差异时，混合模型的优势将很明显。 例如，假设无法向参与免费试用的租户提供与订阅租户相同的性能级别。 策略可以是将处于免费试用阶段的租户存储在由所有免费试用租户共享的某个多租户数据库中。 当某个免费试用租户订阅“基本”服务层级时，可将该租户移到可能包含更少租户的另一个多租户数据库中。 可将购买“高级”服务层级的订阅者移到其拥有的新单租户数据库中。</p>
+<h2 id="池"><a href="#池" class="headerlink" title="池"></a>池</h2><p>在此混合模型中，可将订阅者租户的单租户数据库放在资源池中，以减少每个租户的数据库成本。 “每个租户各有数据库”模型中也采用了这种做法。</p>
+<h1 id="I-租户模型的比较"><a href="#I-租户模型的比较" class="headerlink" title="I. 租户模型的比较"></a>I. 租户模型的比较</h1><p>下表汇总了主要租户模型之间的差异。</p>
+<table>
+<thead>
+<tr>
+<th>度量</th>
+<th>独立应用</th>
+<th>每个租户各有数据库</th>
+<th>分片多租户</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>缩放</td>
+<td>中型   1到数百个</td>
+<td>很高   1 到数十万个</td>
+<td>无限制   1到数百万个</td>
+</tr>
+<tr>
+<td>租户隔离</td>
+<td>很高</td>
+<td>高</td>
+<td>低；任何单租户（即独自在 MT 数据库中的租户）除外。</td>
+</tr>
+<tr>
+<td>每个租户的数据库成本</td>
+<td>高；大小根据峰值而定</td>
+<td>低；使用池。</td>
+<td>最低，适用于 MT 数据库中的小租户。</td>
+</tr>
+<tr>
+<td>性能监视和管理</td>
+<td>仅限每租户</td>
+<td>聚合 + 每租户</td>
+<td>聚合；不过，对于单租户，将应用“仅限每租户”模式。</td>
+</tr>
+<tr>
+<td>开发复杂性</td>
+<td>低</td>
+<td>低</td>
+<td>中等；受分片影响。</td>
+</tr>
+<tr>
+<td>操作复杂性</td>
+<td>低到高。 单个操作较简单，大规模操作较复杂。</td>
+<td>低到中等。 模式可以解决大规模操作的复杂性。</td>
+<td>低到高。 单个租户的管理比较复杂。</td>
+</tr>
+</tbody></table>
+<p>原文链接：<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/azure/azure-sql/database/saas-tenancy-app-design-patterns">https://docs.microsoft.com/en-us/azure/azure-sql/database/saas-tenancy-app-design-patterns</a>  </p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://www.clang.asia">Clang</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://www.clang.asia/2021/12/21/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F/">https://www.clang.asia/2021/12/21/%E5%A4%9A%E7%A7%9F%E6%88%B7SaaS%E6%95%B0%E6%8D%AE%E5%BA%93%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%BC%8F/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://www.clang.asia" target="_blank">Clang's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%9A%E7%A7%9F%E6%88%B7/">多租户</a><a class="post-meta__tags" href="/tags/SaaS/">SaaS</a></div><div class="post-share"><div class="social-share" data-image="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_7.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://unpkg.com/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://unpkg.com/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related" href="/2021/12/15/IntelliJ-IDEA-2021-1%E6%BF%80%E6%B4%BB%E6%AD%A5%E9%AA%A4/" title="IntelliJ IDEA 2021.1激活步骤"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_4.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="info"><div class="info-1"><div class="info-item-1">上一篇</div><div class="info-item-2">IntelliJ IDEA 2021.1激活步骤</div></div><div class="info-2"><div class="info-item-1">目前Jetbrains系列软件的激活方式为通过插件进行30天试用期重置的方式，其他方式都已经失效 1、关于下载安装包可以直接到官方网站下载 https://www.jetbrains.com/idea/download/ 下载版本2021.1 2、IDE Eval Reset 重置试用期插件安装方法：(1)、运行软件，点击试用，进入到软件创建新项目窗口；(2)、左上角菜单栏点打开软件设置窗口：IntelliJ IDEA&#x2F;Preferences，然后选择 Plugins，点击设置图标手动添加第三方插件仓库地：https://plugins.zhile.io(3)、添加仓库后，搜索IDE Eval Reset 插件进行安装 3.插件使用方法安装插件后，在Help -&gt; Eval Reset 调出，有 2 个按钮和 1 个勾选项：按钮：Reload 用来刷新界面上的显示信息。按钮：Reset 点击会询问是否重置试用信息并重启 IDE。选择 Yes 则执行重置操作并重启 IDE 生效，选择 No 则什么也不做。（此为手动重置方式）勾选项：Auto reset...</div></div></div></a><a class="pagination-related" href="/2022/04/21/%E8%A7%A3%E5%86%B3Spring-Cloud-Gateway%E7%BD%91%E5%85%B3%E8%B7%A8%E5%9F%9F%E9%97%AE%E9%A2%98/" title="解决Spring Cloud Gateway网关跨域问题"><img class="cover" src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_6.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">解决Spring Cloud Gateway网关跨域问题</div></div><div class="info-2"><div class="info-item-1">今天前端突然说接口不支持跨域了，马上排查了一番，原因是之前接口一直提供给App使用的，所以不存在跨域的问题。解决方案就是在网关处新增配置类： 123456789101112131415161718192021222324252627282930313233343536373839404142import org.springframework.context.annotation.Bean;import org.springframework.context.annotation.Configuration;import org.springframework.web.cors.CorsConfiguration;import org.springframework.web.cors.reactive.CorsWebFilter;import org.springframework.web.util.pattern.PathPatternParser;@Configurationpublic class CorsConfig &#123;    /**     * 允许跨域请求...</div></div></div></a></nav><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/avatar.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Clang</div><div class="author-info-description"></div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">62</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">11</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/chenhu1001"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/chenhu1001" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:chenhu656719@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">如果尚未看到成果，那是因为付出的努力还不够多，如果尚未梦想成真，那是因为等待的时间还不够久。笑到最后的人永远最精彩，最成功，最执着。</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#A-SaaS-%E6%A6%82%E5%BF%B5%E5%92%8C%E6%9C%AF%E8%AF%AD"><span class="toc-number">1.</span> <span class="toc-text">A. SaaS 概念和术语</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#B-%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E9%80%82%E5%BD%93%E7%9A%84%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">B. 如何选择适当的租户模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#C-%E5%8C%85%E5%90%AB%E5%8D%95%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E7%8B%AC%E7%AB%8B%E5%8D%95%E7%A7%9F%E6%88%B7%E5%BA%94%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">C. 包含单租户数据库的独立单租户应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%BA%A7%E9%9A%94%E7%A6%BB"><span class="toc-number">3.1.</span> <span class="toc-text">应用程序级隔离</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BE%9B%E5%BA%94%E5%95%86%E7%AE%A1%E7%90%86"><span class="toc-number">3.2.</span> <span class="toc-text">供应商管理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#D-%E9%87%87%E7%94%A8%E2%80%9C%E6%AF%8F%E4%B8%AA%E7%A7%9F%E6%88%B7%E5%90%84%E6%9C%89%E6%95%B0%E6%8D%AE%E5%BA%93%E2%80%9D%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%A4%9A%E7%A7%9F%E6%88%B7%E5%BA%94%E7%94%A8"><span class="toc-number">4.</span> <span class="toc-text">D. 采用“每个租户各有数据库”模型的多租户应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B9%E6%8D%AE%E7%A7%9F%E6%88%B7%E8%BF%9B%E8%A1%8C%E8%87%AA%E5%AE%9A%E4%B9%89"><span class="toc-number">4.1.</span> <span class="toc-text">根据租户进行自定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BC%B9%E6%80%A7%E6%B1%A0"><span class="toc-number">4.2.</span> <span class="toc-text">弹性池</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E2%80%9C%E6%AF%8F%E4%B8%AA%E7%A7%9F%E6%88%B7%E5%90%84%E6%9C%89%E6%95%B0%E6%8D%AE%E5%BA%93%E2%80%9D%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%93%8D%E4%BD%9C%E8%A7%84%E6%A8%A1"><span class="toc-number">4.3.</span> <span class="toc-text">“每个租户各有数据库”模型的操作规模</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%87%AA%E5%8A%A8%E5%8C%96"><span class="toc-number">4.4.</span> <span class="toc-text">自动化</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#E-%E5%8C%85%E5%90%AB%E5%A4%9A%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%A4%9A%E7%A7%9F%E6%88%B7%E5%BA%94%E7%94%A8"><span class="toc-number">5.</span> <span class="toc-text">E. 包含多租户数据库的多租户应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%A7%E5%A4%B1%E7%A7%9F%E6%88%B7%E9%9A%94%E7%A6%BB%E6%80%A7"><span class="toc-number">5.1.</span> <span class="toc-text">丧失租户隔离性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%88%90%E6%9C%AC%E6%9B%B4%E4%BD%8E"><span class="toc-number">5.2.</span> <span class="toc-text">成本更低</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#F-%E5%8C%85%E5%90%AB%E5%8D%95%E4%B8%AA%E5%A4%9A%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%A4%9A%E7%A7%9F%E6%88%B7%E5%BA%94%E7%94%A8"><span class="toc-number">6.</span> <span class="toc-text">F. 包含单个多租户数据库的多租户应用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#G-%E5%8C%85%E5%90%AB%E5%88%86%E7%89%87%E5%A4%9A%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%A4%9A%E7%A7%9F%E6%88%B7%E5%BA%94%E7%94%A8"><span class="toc-number">7.</span> <span class="toc-text">G. 包含分片多租户数据库的多租户应用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AE%A1%E7%90%86%E5%88%86%E7%89%87"><span class="toc-number">7.1.</span> <span class="toc-text">管理分片</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B0%8F%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93%E6%9B%B4%E6%98%93%E4%BA%8E%E7%AE%A1%E7%90%86"><span class="toc-number">7.2.</span> <span class="toc-text">小型数据库更易于管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E4%B8%AD%E7%9A%84%E7%A7%9F%E6%88%B7%E6%A0%87%E8%AF%86%E7%AC%A6"><span class="toc-number">7.3.</span> <span class="toc-text">架构中的租户标识符</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E7%89%87%E7%9A%84%E5%BC%B9%E6%80%A7%E6%B1%A0"><span class="toc-number">7.4.</span> <span class="toc-text">分片的弹性池</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#H-%E6%B7%B7%E5%90%88%E5%88%86%E7%89%87%E5%A4%9A%E7%A7%9F%E6%88%B7%E6%95%B0%E6%8D%AE%E5%BA%93%E6%A8%A1%E5%9E%8B"><span class="toc-number">8.</span> <span class="toc-text">H. 混合分片多租户数据库模型</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A7%BB%E5%8A%A8%E7%A7%9F%E6%88%B7"><span class="toc-number">8.1.</span> <span class="toc-text">移动租户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%B1%A0"><span class="toc-number">8.2.</span> <span class="toc-text">池</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#I-%E7%A7%9F%E6%88%B7%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%AF%94%E8%BE%83"><span class="toc-number">9.</span> <span class="toc-text">I. 租户模型的比较</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2025/06/08/%E4%B8%80%E9%94%AE%E6%90%AD%E5%BB%BA-WordPress-MySQL-phpMyAdmin-%E7%8E%AF%E5%A2%83%EF%BC%88%E6%94%AF%E6%8C%81-PHP-%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9-%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%EF%BC%89/" title="一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_2.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）"/></a><div class="content"><a class="title" href="/2025/06/08/%E4%B8%80%E9%94%AE%E6%90%AD%E5%BB%BA-WordPress-MySQL-phpMyAdmin-%E7%8E%AF%E5%A2%83%EF%BC%88%E6%94%AF%E6%8C%81-PHP-%E7%89%88%E6%9C%AC%E9%80%89%E6%8B%A9-%E8%87%AA%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE%EF%BC%89/" title="一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）">一键搭建 WordPress + MySQL + phpMyAdmin 环境（支持 PHP 版本选择 &amp; 自定义配置）</a><time datetime="2025-06-08T16:18:06.000Z" title="发表于 2025-06-08 16:18:06">2025-06-08</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2025/02/16/AI%E7%BD%91%E5%9D%80%E5%A4%A7%E5%85%A8/" title="AI网址大全"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_8.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="AI网址大全"/></a><div class="content"><a class="title" href="/2025/02/16/AI%E7%BD%91%E5%9D%80%E5%A4%A7%E5%85%A8/" title="AI网址大全">AI网址大全</a><time datetime="2025-02-16T15:38:10.000Z" title="发表于 2025-02-16 15:38:10">2025-02-16</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/11/20/%E5%9F%BA%E4%BA%8EC-%E7%BA%BF%E7%A8%8B%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86%E7%9A%84-ROS-%E6%B6%88%E6%81%AF%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96/" title="基于C++线程延迟处理的 ROS 消息逻辑优化"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_5.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="基于C++线程延迟处理的 ROS 消息逻辑优化"/></a><div class="content"><a class="title" href="/2024/11/20/%E5%9F%BA%E4%BA%8EC-%E7%BA%BF%E7%A8%8B%E5%BB%B6%E8%BF%9F%E5%A4%84%E7%90%86%E7%9A%84-ROS-%E6%B6%88%E6%81%AF%E9%80%BB%E8%BE%91%E4%BC%98%E5%8C%96/" title="基于C++线程延迟处理的 ROS 消息逻辑优化">基于C++线程延迟处理的 ROS 消息逻辑优化</a><time datetime="2024-11-20T06:46:27.000Z" title="发表于 2024-11-20 06:46:27">2024-11-20</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/11/19/%E4%BD%BF%E7%94%A8-Docker-%E8%BF%90%E8%A1%8C-Node-js%EF%BC%9A%E6%97%A0%E9%9C%80%E4%BE%9D%E8%B5%96%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC%EF%BC%8C%E5%BF%AB%E9%80%9F%E5%88%87%E6%8D%A2%E3%80%81%E7%8E%AF%E5%A2%83%E9%9A%94%E7%A6%BB/" title="使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_3.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离"/></a><div class="content"><a class="title" href="/2024/11/19/%E4%BD%BF%E7%94%A8-Docker-%E8%BF%90%E8%A1%8C-Node-js%EF%BC%9A%E6%97%A0%E9%9C%80%E4%BE%9D%E8%B5%96%E7%B3%BB%E7%BB%9F%E7%89%88%E6%9C%AC%EF%BC%8C%E5%BF%AB%E9%80%9F%E5%88%87%E6%8D%A2%E3%80%81%E7%8E%AF%E5%A2%83%E9%9A%94%E7%A6%BB/" title="使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离">使用 Docker 运行 Node.js：无需依赖系统版本，快速切换、环境隔离</a><time datetime="2024-11-19T10:21:15.000Z" title="发表于 2024-11-19 10:21:15">2024-11-19</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2024/11/19/Python%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E4%B8%8E%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" title="Python多进程编程与进程间通信"><img src="https://clang.oss-cn-shenzhen.aliyuncs.com/blog/material/material_10.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Python多进程编程与进程间通信"/></a><div class="content"><a class="title" href="/2024/11/19/Python%E5%A4%9A%E8%BF%9B%E7%A8%8B%E7%BC%96%E7%A8%8B%E4%B8%8E%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/" title="Python多进程编程与进程间通信">Python多进程编程与进程间通信</a><time datetime="2024-11-19T06:44:05.000Z" title="发表于 2024-11-19 06:44:05">2024-11-19</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2016 - 2025 By Clang</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo 6.3.0</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly 5.3.3</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="前往评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><div class="js-pjax"><script>(() => {
+  const isShuoshuo = GLOBAL_CONFIG_SITE.pageType === 'shuoshuo'
+  const option = null
+
+  const initValine = (el, path) => {
+    if (isShuoshuo) {
+      window.shuoshuoComment.destroyValine = () => {
+        if (el.children.length) {
+          el.innerHTML = ''
+          el.classList.add('no-comment')
+        }
+      }
+    }
+
+    const valineConfig = {
+      el: '#vcomment',
+      appId: 'I7JKJGOjUYSriGoASwXxl3bU-gzGzoHsz',
+      appKey: 'gnJRTHhU20o70y1RBVFQ4N4Q',
+      avatar: 'monsterid',
+      serverURLs: '',
+      emojiMaps: "",
+      visitor: false,
+      ...option,
+      path: isShuoshuo ? path : (option && option.path) || window.location.pathname
+    }
+
+    new Valine(valineConfig)
+  }
+
+  const loadValine = async (el, path) => {
+    if (typeof Valine === 'function') {
+      initValine(el, path)
+    } else {
+      await btf.getScript('https://unpkg.com/valine/dist/Valine.min.js')
+      initValine(el, path)
+    }
+  }
+
+  if (isShuoshuo) {
+    'Valine' === 'Valine'
+      ? window.shuoshuoComment = { loadComment: loadValine }
+      : window.loadOtherComment = loadValine
+    return
+  }
+
+  if ('Valine' === 'Valine' || !false) {
+    if (false) btf.loadComment(document.getElementById('vcomment'),loadValine)
+    else setTimeout(loadValine, 0)
+  } else {
+    window.loadOtherComment = loadValine
+  }
+})()</script></div><script defer="defer" id="ribbon" src="https://unpkg.com/butterfly-extsrc/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script></div></body></html>
